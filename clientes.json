@@ -1,0 +1,16 @@
+{
+    "ClienteA": {
+    "host": "44.207.38.121",
+    "port": 5432,
+    "database": "api_teste",
+    "user": "wareline_integracoes",
+    "password": "Ramoney2005"
+    },
+    "ClienteB": {
+    "host": "",
+    "port": 5432,
+    "database": "",
+    "user": "",
+    "password": ""
+    }
+}
