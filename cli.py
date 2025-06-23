@@ -7,7 +7,6 @@ from tkinter import filedialog
 
 ctk.set_appearance_mode("dark")
 
-
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -38,9 +37,15 @@ class App(ctk.CTk):
         self.lista_atendimentos = ctk.CTkOptionMenu(self, values=["Nenhum"])
         self.lista_atendimentos.pack(pady=8)
 
-        # Botão buscar detalhes
-        self.botao_buscar_detalhes = ctk.CTkButton(self, text="Buscar Detalhes do Atendimento", command=self.buscar_detalhes)
-        self.botao_buscar_detalhes.pack(pady=8)
+        # Frame com botões lado a lado
+        self.frame_botoes = ctk.CTkFrame(self)
+        self.frame_botoes.pack(pady=8)
+
+        self.botao_buscar_detalhes = ctk.CTkButton(self.frame_botoes, text="Buscar Detalhes do Atendimento", command=self.buscar_detalhes)
+        self.botao_buscar_detalhes.pack(side="left", padx=10)
+
+        self.botao_exportar_rapido = ctk.CTkButton(self.frame_botoes, text="📤 Exportar para Excel", command=self.exportar_excel)
+        self.botao_exportar_rapido.pack(side="left", padx=10)
 
         # Status
         self.status_label = ctk.CTkLabel(self, text="", text_color="gray")
