@@ -11,38 +11,43 @@ ctk.set_appearance_mode("dark")
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+    
         self.title("Consulta de Atendimentos")
         self.geometry("1000x750")
         self.iconbitmap("imagens/excel.ico")
 
-        # Entradas para intervalo de datas (fora das abas)
-        self.label_data_inicio = ctk.CTkLabel(self, text="Data Início (YYYY-MM-DD HH:MM:SS):")
-        self.label_data_inicio.pack()
-        self.entrada_data_inicio = ctk.CTkEntry(self)
-        self.entrada_data_inicio.pack()
+        # Frame superior com campos de data
+        self.frame_datas = ctk.CTkFrame(self)
+        self.frame_datas.pack(pady=10)
 
-        self.label_data_fim = ctk.CTkLabel(self, text="Data Fim (YYYY-MM-DD HH:MM:SS):")
-        self.label_data_fim.pack()
-        self.entrada_data_fim = ctk.CTkEntry(self)
-        self.entrada_data_fim.pack()
+        self.label_data_inicio = ctk.CTkLabel(self.frame_datas, text="Data Início (YYYY-MM-DD HH:MM:SS):")
+        self.label_data_inicio.pack(side="left", padx=10)
+        self.entrada_data_inicio = ctk.CTkEntry(self.frame_datas, width=200)
+        self.entrada_data_inicio.pack(side="left", padx=10)
 
+        self.label_data_fim = ctk.CTkLabel(self.frame_datas, text="Data Fim (YYYY-MM-DD HH:MM:SS):")
+        self.label_data_fim.pack(side="left", padx=10)
+        self.entrada_data_fim = ctk.CTkEntry(self.frame_datas, width=200)
+        self.entrada_data_fim.pack(side="left", padx=10)
+
+        # Botão buscar atendimentos
         self.botao_buscar_atendimentos = ctk.CTkButton(self, text="Buscar Atendimentos", command=self.buscar_atendimentos)
-        self.botao_buscar_atendimentos.pack(pady=10)
+        self.botao_buscar_atendimentos.pack(pady=8)
 
-        # Lista de atendimentos encontrados (fora das abas)
+        # Lista de atendimentos
         self.lista_atendimentos = ctk.CTkOptionMenu(self, values=["Nenhum"])
-        self.lista_atendimentos.pack(pady=10)
+        self.lista_atendimentos.pack(pady=8)
 
-        # Botão para buscar detalhes (fora das abas)
+        # Botão buscar detalhes
         self.botao_buscar_detalhes = ctk.CTkButton(self, text="Buscar Detalhes do Atendimento", command=self.buscar_detalhes)
-        self.botao_buscar_detalhes.pack(pady=10)
+        self.botao_buscar_detalhes.pack(pady=8)
 
-        # Mensagem de status (fora das abas)
+        # Status
         self.status_label = ctk.CTkLabel(self, text="", text_color="gray")
         self.status_label.pack(pady=5)
 
         # Cria o tabview
-        self.tabs = ctk.CTkTabview(self, width=950, height=350)
+        self.tabs = ctk.CTkTabview(self, width=950, height=400)
         self.tabs.pack(pady=10)
 
         # Aba Resultados
@@ -50,7 +55,7 @@ class App(ctk.CTk):
 
         self.label_consumo = ctk.CTkLabel(self.tab_resultados, text="--- CONSUMOS ---")
         self.label_consumo.pack()
-        self.frame_consumo = ctk.CTkScrollableFrame(self.tab_resultados, width=920, height=150)
+        self.frame_consumo = ctk.CTkScrollableFrame(self.tab_resultados, width=920, height=200)
         self.frame_consumo.pack(pady=5)
 
         self.label_diarias = ctk.CTkLabel(self.tab_resultados, text="--- DIÁRIAS ---")
@@ -61,20 +66,51 @@ class App(ctk.CTk):
         # Aba Exportar
         self.tab_exportar = self.tabs.add("📤 Exportar")
 
-        self.chk_diarias = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Diárias")
+        self.chk_diarias = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Diárias", command=self.atualizar_checklist_diarias)
         self.chk_diarias.pack(pady=10)
         self.chk_diarias.select()
 
-        self.chk_consumo = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Consumos")
+        self.checklist_diarias = ctk.CTkScrollableFrame(self.tab_exportar, width=400, height=150)
+        self.checklist_diarias.pack(pady=5)
+
+        self.chk_consumo = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Consumos", command=self.atualizar_checklist_consumo)
         self.chk_consumo.pack(pady=10)
         self.chk_consumo.select()
+
+        self.checklist_consumo = ctk.CTkScrollableFrame(self.tab_exportar, width=400, height=150)
+        self.checklist_consumo.pack(pady=5)
 
         botao_salvar = ctk.CTkButton(self.tab_exportar, text="Salvar Arquivo", command=self.exportar_excel)
         botao_salvar.pack(pady=20)
 
+        self.checkboxes_diarias = {}
+        self.checkboxes_consumo = {}
+
         # Dados para exportação
         self.dados_diarias = []
         self.dados_consumo = []
+
+    def atualizar_checklist_diarias(self):
+        for widget in self.checklist_diarias.winfo_children():
+            widget.destroy()
+        if self.dados_diarias:
+            colunas = list(self.dados_diarias[0].keys())
+            for col in colunas:
+                cb = ctk.CTkCheckBox(self.checklist_diarias, text=col)
+                cb.pack(anchor="w")
+                cb.select()
+                self.checkboxes_diarias[col] = cb
+
+    def atualizar_checklist_consumo(self):
+        for widget in self.checklist_consumo.winfo_children():
+            widget.destroy()
+        if self.dados_consumo:
+            colunas = list(self.dados_consumo[0].keys())
+            for col in colunas:
+                cb = ctk.CTkCheckBox(self.checklist_consumo, text=col)
+                cb.pack(anchor="w")
+                cb.select()
+                self.checkboxes_consumo[col] = cb
 
     def exibir_tabela(self, frame, dados):
         for widget in frame.winfo_children():
@@ -155,7 +191,8 @@ class App(ctk.CTk):
             self.exibir_tabela(self.frame_consumo, self.dados_consumo)
             self.status_label.configure(text=f"📋 Exibindo detalhes do atendimento {numero}.")
 
-            # Muda para aba resultados ao carregar dados
+            self.atualizar_checklist_diarias()
+            self.atualizar_checklist_consumo()
             self.tabs.set("📋 Resultados")
 
         except Exception as e:
@@ -184,9 +221,11 @@ class App(ctk.CTk):
 
             with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
                 if exportar_diarias and self.dados_diarias:
-                    pd.DataFrame(self.dados_diarias).to_excel(writer, sheet_name="Diarias", index=False)
+                    colunas = [col for col, cb in self.checkboxes_diarias.items() if cb.get()]
+                    pd.DataFrame(self.dados_diarias)[colunas].to_excel(writer, sheet_name="Diarias", index=False)
                 if exportar_consumo and self.dados_consumo:
-                    pd.DataFrame(self.dados_consumo).to_excel(writer, sheet_name="Consumo", index=False)
+                    colunas = [col for col, cb in self.checkboxes_consumo.items() if cb.get()]
+                    pd.DataFrame(self.dados_consumo)[colunas].to_excel(writer, sheet_name="Consumo", index=False)
 
             self.status_label.configure(text=f"✅ Exportado com sucesso para '{file_path}'")
 
