@@ -5,7 +5,7 @@ import asyncpg
 import pandas as pd
 from tkinter import filedialog
 from CTkMessagebox import CTkMessagebox
-from tkcalendar import DateEntry  # Calendário interativo
+from tkcalendar import DateEntry
 
 ctk.set_appearance_mode("dark")
 
@@ -17,26 +17,26 @@ class App(ctk.CTk):
         self.geometry("1000x700")
         self.iconbitmap("imagens/gestor.ico")
 
-        # Frame de datas com calendário e hora
+        # Frame de datas com calendário e hora #
         self.frame_datas = ctk.CTkFrame(self)
         self.frame_datas.pack(pady=10)
 
-        self.label_data_inicio = ctk.CTkLabel(self.frame_datas, text="📅 Início:")
+        self.label_data_inicio = ctk.CTkLabel(self.frame_datas, text="🗓️ Início:")
         self.label_data_inicio.pack(side="left", padx=(10, 5))
-        self.entrada_data_inicio = DateEntry(self.frame_datas, width=12, background="darkred", foreground="white", date_pattern="yyyy-mm-dd")
+        self.entrada_data_inicio = DateEntry(self.frame_datas, width=12, background="#BE9063", foreground="white", date_pattern="yyyy-mm-dd")
         self.entrada_data_inicio.pack(side="left", padx=5)
         self.hora_inicio = ctk.CTkEntry(self.frame_datas, width=80, placeholder_text="HH:MM:SS")
         self.hora_inicio.pack(side="left", padx=(0, 15))
 
-        self.label_data_fim = ctk.CTkLabel(self.frame_datas, text="📅 Fim:")
+        self.label_data_fim = ctk.CTkLabel(self.frame_datas, text="🗓️ Fim:")
         self.label_data_fim.pack(side="left", padx=5)
-        self.entrada_data_fim = DateEntry(self.frame_datas, width=12, background="darkred", foreground="white", date_pattern="yyyy-mm-dd")
+        self.entrada_data_fim = DateEntry(self.frame_datas, width=12, background="#BE9063", foreground="white", date_pattern="yyyy-mm-dd")
         self.entrada_data_fim.pack(side="left", padx=5)
         self.hora_fim = ctk.CTkEntry(self.frame_datas, width=80, placeholder_text="HH:MM:SS")
         self.hora_fim.pack(side="left", padx=(0, 15))
 
-        # Botões de busca
-        self.botao_buscar_atendimentos = ctk.CTkButton(self, text="🔎 Buscar Atendimentos", command=self.buscar_atendimentos)
+        # Botões de busca #
+        self.botao_buscar_atendimentos = ctk.CTkButton(self, text="🔎 Buscar Atendimentos",fg_color="#525B56", command=self.buscar_atendimentos)
         self.botao_buscar_atendimentos.pack(pady=8)
 
         self.lista_atendimentos = ctk.CTkOptionMenu(self, values=["Nenhum"])
@@ -45,11 +45,8 @@ class App(ctk.CTk):
         self.frame_botoes = ctk.CTkFrame(self)
         self.frame_botoes.pack(pady=8)
 
-        self.botao_buscar_detalhes = ctk.CTkButton(self.frame_botoes, text="🔎 Buscar Detalhes do Atendimento", command=self.buscar_detalhes)
+        self.botao_buscar_detalhes = ctk.CTkButton(self.frame_botoes, text="🔎 Buscar Detalhes do Atendimento",fg_color="#525B56", command=self.buscar_detalhes)
         self.botao_buscar_detalhes.pack(side="left", padx=10)
-
-        self.botao_exportar_rapido = ctk.CTkButton(self.frame_botoes, text="📤 Exportar para Excel", text_color="red", fg_color="white", command=self.exportar_excel)
-        self.botao_exportar_rapido.pack(side="left", padx=10)
 
         self.status_label = ctk.CTkLabel(self, text="", text_color="gray")
         self.status_label.pack(pady=5)
@@ -69,50 +66,16 @@ class App(ctk.CTk):
         self.frame_diarias = ctk.CTkScrollableFrame(self.tab_resultados, width=920, height=150)
         self.frame_diarias.pack(pady=5)
 
-        self.tab_exportar = self.tabs.add("📤 Exportar")
+        self.tab_exportar = self.tabs.add("📄 Exportar")
 
-        self.chk_diarias = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Diárias", command=self.atualizar_checklist_diarias)
-        self.chk_diarias.pack(pady=10)
-        self.chk_diarias.select()
+        self.botao_exportar_diarias = ctk.CTkButton(self.tab_exportar, text="📄 Exportar Diárias", fg_color="#BE9063", command=self.exportar_diarias)
+        self.botao_exportar_diarias.pack(pady=15)
 
-        self.checklist_diarias = ctk.CTkScrollableFrame(self.tab_exportar, width=400, height=150)
-        self.checklist_diarias.pack(pady=5)
-
-        self.chk_consumo = ctk.CTkCheckBox(self.tab_exportar, text="Exportar Consumos", command=self.atualizar_checklist_consumo)
-        self.chk_consumo.pack(pady=10)
-        self.chk_consumo.select()
-
-        self.checklist_consumo = ctk.CTkScrollableFrame(self.tab_exportar, width=400, height=150)
-        self.checklist_consumo.pack(pady=5)
-
-        botao_salvar = ctk.CTkButton(self.tab_exportar, text="Salvar Arquivo", command=self.exportar_excel)
-        botao_salvar.pack(pady=20)
-
-        self.checkboxes_diarias = {}
-        self.checkboxes_consumo = {}
+        self.botao_exportar_consumos = ctk.CTkButton(self.tab_exportar, text="📄 Exportar Consumos", fg_color="#BE9063", command=self.exportar_consumos)
+        self.botao_exportar_consumos.pack(pady=15)
 
         self.dados_diarias = []
         self.dados_consumo = []
-
-    def atualizar_checklist_diarias(self):
-        for widget in self.checklist_diarias.winfo_children():
-            widget.destroy()
-        if self.dados_diarias:
-            for col in self.dados_diarias[0].keys():
-                cb = ctk.CTkCheckBox(self.checklist_diarias, text=col)
-                cb.pack(anchor="w")
-                cb.select()
-                self.checkboxes_diarias[col] = cb
-
-    def atualizar_checklist_consumo(self):
-        for widget in self.checklist_consumo.winfo_children():
-            widget.destroy()
-        if self.dados_consumo:
-            for col in self.dados_consumo[0].keys():
-                cb = ctk.CTkCheckBox(self.checklist_consumo, text=col)
-                cb.pack(anchor="w")
-                cb.select()
-                self.checkboxes_consumo[col] = cb
 
     def exibir_tabela(self, frame, dados):
         for widget in frame.winfo_children():
@@ -129,9 +92,9 @@ class App(ctk.CTk):
 
     def buscar_atendimentos(self):
         data_inicio = self.entrada_data_inicio.get()
-        hora_inicio = self.hora_inicio.get() or "00:00:00" 
+        hora_inicio = self.hora_inicio.get() or "00:00:00"
         data_fim = self.entrada_data_fim.get()
-        hora_fim = self.hora_fim.get() or "23:59:59"        
+        hora_fim = self.hora_fim.get() or "23:59:59"
 
         data_inicio_completa = f"{data_inicio} {hora_inicio}"
         data_fim_completa = f"{data_fim} {hora_fim}"
@@ -142,7 +105,6 @@ class App(ctk.CTk):
             asyncio.run(self.executar_busca_atendimentos(dt_inicio, dt_fim))
         except ValueError:
             self.status_label.configure(text="⚠️ Data/hora em formato inválido (use: YYYY-MM-DD HH:MM:SS)")
-
 
     async def executar_busca_atendimentos(self, dt_inicio, dt_fim):
         try:
@@ -182,35 +144,40 @@ class App(ctk.CTk):
             self.dados_consumo = [dict(c) for c in consumo]
             self.exibir_tabela(self.frame_diarias, self.dados_diarias)
             self.exibir_tabela(self.frame_consumo, self.dados_consumo)
-            self.atualizar_checklist_diarias()
-            self.atualizar_checklist_consumo()
             self.tabs.set("📋 Resultados")
             self.status_label.configure(text=f"📋 Exibindo atendimento {numero}")
         except Exception as e:
             self.status_label.configure(text=f"Erro ao buscar detalhes: {e}")
 
-    def exportar_excel(self):
-        exportar_diarias = self.chk_diarias.get()
-        exportar_consumo = self.chk_consumo.get()
-        if not exportar_diarias and not exportar_consumo:
-            self.status_label.configure(text="⚠️ Selecione ao menos uma tabela para exportar.")
+    def exportar_diarias(self):
+        if not self.dados_diarias:
+            self.status_label.configure(text="⚠️ Nenhuma diária para exportar.")
             return
         try:
             agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            nome_padrao = f"atendimento_export_{agora}.xlsx"
+            nome_padrao = f"diarias_{agora}.xlsx"
             file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", initialfile=nome_padrao, filetypes=[("Excel Files", "*.xlsx")])
             if not file_path:
                 return
-            with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
-                if exportar_diarias and self.dados_diarias:
-                    colunas = [col for col, cb in self.checkboxes_diarias.items() if cb.get()]
-                    pd.DataFrame(self.dados_diarias)[colunas].to_excel(writer, sheet_name="Diarias", index=False)
-                if exportar_consumo and self.dados_consumo:
-                    colunas = [col for col, cb in self.checkboxes_consumo.items() if cb.get()]
-                    pd.DataFrame(self.dados_consumo)[colunas].to_excel(writer, sheet_name="Consumo", index=False)
-            self.status_label.configure(text=f"✅ Exportado com sucesso para '{file_path}'")
+            pd.DataFrame(self.dados_diarias).to_excel(file_path, sheet_name="Diarias", index=False)
+            self.status_label.configure(text=f"✅ Diárias exportadas com sucesso para '{file_path}'")
         except Exception as e:
-            self.status_label.configure(text=f"Erro ao exportar Excel: {e}")
+            self.status_label.configure(text=f"Erro ao exportar diárias: {e}")
+
+    def exportar_consumos(self):
+        if not self.dados_consumo:
+            self.status_label.configure(text="⚠️ Nenhum consumo para exportar.")
+            return
+        try:
+            agora = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            nome_padrao = f"consumos_{agora}.xlsx"
+            file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", initialfile=nome_padrao, filetypes=[("Excel Files", "*.xlsx")])
+            if not file_path:
+                return
+            pd.DataFrame(self.dados_consumo).to_excel(file_path, sheet_name="Consumos", index=False)
+            self.status_label.configure(text=f"✅ Consumos exportados com sucesso para '{file_path}'")
+        except Exception as e:
+            self.status_label.configure(text=f"Erro ao exportar consumos: {e}")
 
 if __name__ == '__main__':
     app = App()
